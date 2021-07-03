@@ -5,6 +5,8 @@ import CoinItem from './components/CoinItem'
 
 const App = () => {
   const [coins, setCoins] = useState([])
+  const [search, setSearch] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
   
   const loadData = async () => {
     const res = await fetch(
@@ -24,15 +26,26 @@ const App = () => {
       <StatusBar backgroundColor = "#141414"/>
       <View style = {styles.header}>
         <Text style = {styles.title}>Market</Text>
-        <TextInput style = {styles.searchInput}/>
+        <TextInput style = {styles.searchInput}
+          placeholder = "Search a Coin"
+          placeholderTextColor = "#858585"
+          onChangeText = {text => setSearch(text)}
+        />
       </View>
       <FlatList
         style = {styles.list}
-        data = {coins}
+        data = {
+          coins.filter(coin => coin.name.toLowerCase().includes(search)) || coin.symbol.toLowerCase().includes(search)}
         renderItem = {({item}) => {
           return <CoinItem coin = {item}/>
         }}
         showsVerticalScrollIndicator = {false}
+        refreshing = {refreshing}
+        onRefresh = {async() => {
+          setRefreshing(true)
+          await loadData()
+          setRefreshing(false)
+        }}
       />
 
     </View>
